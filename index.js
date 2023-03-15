@@ -9,14 +9,8 @@ const cartRoute = require("./routes/cart");
 const orderRoute = require("./routes/order");
 const stripeRoute = require("./routes/stripe");
 
-dotenv.config();
 
-mongoose
-.connect(process.env.MONGO_URL)
-.then(() => console.log("DB Connection Succesful"))
-    .catch((err)=>{
-    console.log(err);
-});
+dotenv.config();
 
 app.use(express.json());
 app.use("/api/auth", authRoute);

@@ -1,4 +1,4 @@
-const Cart = require("../models/Cart");
+const { prisma } = require("../db");
 const {
   verifyToken,
   verifyTokenAndAutherization,
@@ -13,8 +13,8 @@ router.post("/", verifyToken, async (req, res) => {
   const newCart = new Cart(req.body);
 
   try {
-    const savedCart = await newCart.save();
-    res.status(200).json(savedCart);
+    const newCart = await prisma.cart.create();
+    res.status(200).json(newCart);
   } catch (err) {
     res.status(500).json(err);
   }
@@ -23,13 +23,10 @@ router.post("/", verifyToken, async (req, res) => {
 //UPDATE
 router.put("/:id", verifyTokenAndAutherization, async (req, res) => {
   try {
-    const updatedCart = await Cart.findByIdAndUpdate(
-      req.params.id,
-      {
-        $set: req.body,
-      },
-      { new: true }
-    );
+    const { id } = req.params;
+    const updatedCart = await prisma.cart.update({
+      where: { id: parseInt(id) },
+  });
     res.status(200).json(updatedCart);
   } catch (err) {
     res.status(500).json(err);
@@ -39,7 +36,9 @@ router.put("/:id", verifyTokenAndAutherization, async (req, res) => {
 //DELETE
 router.delete("/:id", verifyTokenAndAutherization, async (req, res) => {
   try {
-    await Cart.findByIdAndDelete(req.params.id);
+    await prisma.cart.delete({
+      where: { id: parseInt(id) },
+    });
     res.status(200).json("Cart has been deleted...");
   } catch (err) {
     res.status(500).json(err);
@@ -49,7 +48,9 @@ router.delete("/:id", verifyTokenAndAutherization, async (req, res) => {
 //GET USER CART
 router.get("/find/:userId", verifyTokenAndAutherization, async (req, res) => {
   try {
-    const cart = await Cart.findOne({ userId: req.params.userId });
+    const cart = await prisma.cart.findFirstOrThrow({
+       where: { id: parseInt(id)},
+  });
     res.status(200).json(cart);
   } catch (err) {
     res.status(500).json(err);
@@ -60,7 +61,7 @@ router.get("/find/:userId", verifyTokenAndAutherization, async (req, res) => {
 
 router.get("/", verifyTokenAndAdmin, async (req, res) => {
   try {
-    const carts = await Cart.find();
+    const carts = await prisma.cart.findMany();
     res.status(200).json(carts);
   } catch (err) {
     res.status(500).json(err);

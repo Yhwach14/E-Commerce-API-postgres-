@@ -1,4 +1,4 @@
-const Product = require("../models/Product");
+const { prisma } = require("../db");
 const {
   verifyToken,
   verifyTokenAndAuthorization,
@@ -13,8 +13,8 @@ router.post("/", verifyTokenAndAdmin, async (req, res) => {
   const newProduct = new Product(req.body);
 
   try {
-    const savedProduct = await newProduct.save();
-    res.status(200).json(savedProduct);
+    const newProduct = await prisma.product.create();
+    res.status(200).json(newProduct);
   } catch (err) {
     res.status(500).json(err);
   }
@@ -23,13 +23,9 @@ router.post("/", verifyTokenAndAdmin, async (req, res) => {
 //UPDATE
 router.put("/:id", verifyTokenAndAdmin, async (req, res) => {
   try {
-    const updatedProduct = await Product.findByIdAndUpdate(
-      req.params.id,
-      {
-        $set: req.body,
-      },
-      { new: true }
-    );
+    const updatedProduct = await prisma.product.update({
+      where: { id: parseInt(id) },
+    });
     res.status(200).json(updatedProduct);
   } catch (err) {
     res.status(500).json(err);
@@ -39,7 +35,9 @@ router.put("/:id", verifyTokenAndAdmin, async (req, res) => {
 //DELETE
 router.delete("/:id", verifyTokenAndAdmin, async (req, res) => {
   try {
-    await Product.findByIdAndDelete(req.params.id);
+    await prisma.product.delete({
+      where: { id: parseInt(id) },
+    });
     res.status(200).json("Product has been deleted...");
   } catch (err) {
     res.status(500).json(err);
@@ -49,7 +47,7 @@ router.delete("/:id", verifyTokenAndAdmin, async (req, res) => {
 //GET PRODUCT
 router.get("/find/:id", async (req, res) => {
   try {
-    const product = await Product.findById(req.params.id);
+    const product = await prisma.product.findFirst(req.params.id);
     res.status(200).json(product);
   } catch (err) {
     res.status(500).json(err);
@@ -64,15 +62,16 @@ router.get("/", async (req, res) => {
     let products;
 
     if (qNew) {
-      products = await Product.find().sort({ createdAt: -1 }).limit(1);
+      products = await prisma.product.findMany({
+        take: 1,
+        orderBy: { id: "desc" },
+      });
     } else if (qCategory) {
-      products = await Product.find({
-        categories: {
-          $in: [qCategory],
-        },
+      products = await prisma.product.findMany({
+        include: { qCategory: true },
       });
     } else {
-      products = await Product.find();
+      products = await prisma.product.findMany();
     }
 
     res.status(200).json(products);

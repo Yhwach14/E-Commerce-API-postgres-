@@ -13,3 +13,40 @@ model users {
   email    String? @db.VarChar(30)
   password String? @db.VarChar(30)
 }
+
+/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by the Prisma Client.
+model cart {
+  id        String   @id @db.VarChar(30)
+  productid String?  @db.VarChar(30)
+  quantity  Decimal? @db.Decimal
+  userID    String[] @db.VarChar(30)
+
+  @@ignore
+}
+
+/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by the Prisma Client.
+model orders {
+  id        String   @id @db.VarChar(30)
+  productid String?  @db.VarChar(30)
+  quantity  Decimal? @db.Decimal
+  amount    Decimal? @db.Decimal
+  address   String?  @db.VarChar(30)
+  status    String?  @db.VarChar(30)
+  userID    String[] @db.VarChar(30)
+
+  @@ignore
+}
+
+/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by the Prisma Client.
+model product {
+  title       String?  @db.VarChar(30)
+  description String?  @db.VarChar(30)
+  img         String?  @db.VarChar(30)
+  categories  String[]
+  size        String?  @db.VarChar(30)
+  color       String?  @db.VarChar(30)
+  price       Decimal? @db.Decimal
+  id          String[] @id @db.VarChar(30)
+
+  @@ignore
+}
